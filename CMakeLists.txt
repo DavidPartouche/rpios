@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
-project(rpios C)
 
-set(CMAKE_C_FLAGS "-Wall -nostdlib -nostartfiles -ffreestanding -mgeneral-regs-only")
+set(CMAKE_TOOLCHAIN_FILE aarch64.cmake)
 
-add_executable(rpios main.c)
-set_target_properties(rpios PROPERTIES LINK_DEPENDS "src/linker.ld")
+project(rpios C ASM)
 
-add_custom_command(TARGET rpios POST_BUILD COMMAND "aarch64-linux-gnu-objcopy ${CMAKE_BINARY_DIR}/rpios -O binary kernel8.img")
+add_executable(${PROJECT_NAME} src/boot.S src/kernel.c)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY} ARGS -O binary ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf ${CMAKE_BINARY_DIR}/kernel8.img)
